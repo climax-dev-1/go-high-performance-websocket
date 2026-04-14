@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>WS Relay Demo — DID + UCAN + NATS</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header>
+    <h1>WS Relay Demo</h1>
+    <div class="status">
+      <span id="status-dot" class="dot dot-off"></span>
+      <span id="status-text">idle</span>
+    </div>
+  </header>
+
+  <div id="browser-warning" class="warning hidden">
+    This demo requires native WebCrypto Ed25519 (Chrome 137+, Firefox 129+, Safari 17+).
+    Your browser does not appear to support it.
+  </div>
+
+  <main>
+    <section class="col">
+      <h2>Identity</h2>
+      <div class="card">
+        <div class="kv"><span class="k">Client DID</span><code id="client-did">…</code></div>
+        <div class="kv"><span class="k">Relay DID</span><code id="relay-did">…</code></div>
+        <div class="kv"><span class="k">Conn ID</span><code id="conn-id">—</code></div>
+        <div class="kv"><span class="k">Subject prefix</span><code id="subject-prefix">—</code></div>
+        <div id="caps" class="caps"></div>
+        <button id="connect-btn">Connect</button>
+      </div>
+
+      <h2>Handshake log</h2>
+      <pre id="handshake-log" class="log"></pre>
+    </section>
+
+    <section class="col">
+      <h2>Chat</h2>
+      <div class="card">
+        <div class="chat-controls">
+          <label>Room <input id="chat-room" value="lobby" autocomplete="off"></label>
+          <label>Nick <input id="chat-nick" value="" autocomplete="off" placeholder="anon"></label>
+        </div>
+        <div id="chat-log" class="chat-log"></div>
+        <form id="chat-form" class="chat-form">
+          <input id="chat-input" placeholder="Type and hit enter…" autocomplete="off" disabled>
+          <button type="submit" disabled>Send</button>
+        </form>
+        <div class="hint">Open a second tab to see real-time fan-out. Messages ride <code>demo.chat.&lt;room&gt;</code> with UCAN-gated pub/sub on the relay.</div>
+      </div>
+
+      <details class="advanced">
+        <summary>Advanced: raw pub/sub</summary>
+
+        <h3>Subscribe</h3>
+        <div class="card">
+          <form id="sub-form">
+            <input id="sub-subject" placeholder="demo.foo" autocomplete="off" required>
+            <button type="submit">Subscribe</button>
+          </form>
+          <ul id="subs-list"></ul>
+        </div>
+
+        <h3>Publish</h3>
+        <div class="card">
+          <form id="pub-form">
+            <input id="pub-subject" placeholder="demo.foo" autocomplete="off" required>
+            <textarea id="pub-payload" rows="3" placeholder='"hello"'>"hello"</textarea>
+            <button type="submit">Publish</button>
+          </form>
+        </div>
+
+        <h3>Live feed (all subjects)</h3>
+        <div id="feed" class="feed"></div>
+      </details>
+    </section>
+  </main>
+
+  <footer>
+    <a href="/metrics">/metrics</a>
+    <span>·</span>
+    <span>Ed25519 · did:key · UCAN v1 · NATS · Go</span>
+  </footer>
+
+  <script src="/app.js"></script>
+</body>
+</html>
