@@ -53,16 +53,14 @@ func main() {
 }
 
 type virtualClient struct {
-	id         int
-	ws         *websocket.Conn
-	ctx        context.Context
-	cancel     context.CancelFunc
-	received   chan eventSample
-	wg         sync.WaitGroup
+	ws       *websocket.Conn
+	ctx      context.Context
+	cancel   context.CancelFunc
+	received chan eventSample
 }
 
 type eventSample struct {
-	seq       int64
+	seq        int64
 	receivedAt int64
 }
 
@@ -138,7 +136,6 @@ func run(addrFlag string, n, concurrency int, duration time.Duration, subject st
 	// Start per-client readers.
 	for _, c := range clients {
 		c.received = make(chan eventSample, 1024)
-		c.wg.Add(1)
 		go readEvents(c)
 	}
 
@@ -307,7 +304,6 @@ func subscribeClient(c *virtualClient, subject string) error {
 }
 
 func readEvents(c *virtualClient) {
-	defer c.wg.Done()
 	for {
 		_, data, err := c.ws.Read(c.ctx)
 		if err != nil {

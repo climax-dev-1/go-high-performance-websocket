@@ -89,7 +89,7 @@ type testClient struct {
 	events    chan protocol.EventMsg
 }
 
-func dialAndHandshake(t *testing.T, addr string, subjectGlob string) *testClient {
+func dialAndHandshake(t *testing.T, addr string) *testClient {
 	t.Helper()
 	base := "http://" + addr
 	pub, priv, err := ed25519.GenerateKey(rand.Reader)
@@ -170,7 +170,6 @@ func dialAndHandshake(t *testing.T, addr string, subjectGlob string) *testClient
 		cancel()
 		t.Fatalf("expected ready, got %s", string(data))
 	}
-	_ = subjectGlob
 
 	c := &testClient{
 		ws:        ws,
@@ -180,11 +179,11 @@ func dialAndHandshake(t *testing.T, addr string, subjectGlob string) *testClient
 		priv:      priv,
 		events:    make(chan protocol.EventMsg, 64),
 	}
-	go c.reader(t)
+	go c.reader()
 	return c
 }
 
-func (c *testClient) reader(t *testing.T) {
+func (c *testClient) reader() {
 	for {
 		_, data, err := c.ws.Read(c.ctx)
 		if err != nil {
@@ -239,9 +238,9 @@ func TestEndToEnd(t *testing.T) {
 	ts := startTestServer(t)
 	defer ts.stop(t)
 
-	a := dialAndHandshake(t, ts.addr, "demo.*")
+	a := dialAndHandshake(t, ts.addr)
 	defer a.close()
-	b := dialAndHandshake(t, ts.addr, "demo.*")
+	b := dialAndHandshake(t, ts.addr)
 	defer b.close()
 
 	a.subscribe(t, "demo.foo")
@@ -265,7 +264,7 @@ func TestEndToEnd(t *testing.T) {
 func TestUnauthorizedPublishSubject(t *testing.T) {
 	ts := startTestServer(t)
 	defer ts.stop(t)
-	c := dialAndHandshake(t, ts.addr, "demo.*")
+	c := dialAndHandshake(t, ts.addr)
 	defer c.close()
 
 	// Try to publish to a subject outside the allowed prefix. The server
@@ -358,7 +357,7 @@ func TestGracefulShutdownLeakCheck(t *testing.T) {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			c := dialAndHandshake(t, ts.addr, "demo.*")
+			c := dialAndHandshake(t, ts.addr)
 			mu.Lock()
 			clients = append(clients, c)
 			mu.Unlock()

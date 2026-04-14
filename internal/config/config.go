@@ -3,20 +3,18 @@ package config
 import (
 	"fmt"
 	"os"
-	"strconv"
 	"time"
 )
 
 type Config struct {
-	HTTPAddr        string
-	LogLevel        string
-	Env             string
-	UCANTTL         time.Duration
-	SubjectPrefix   string
-	MaxConnections  int
-	OutboundBuffer  int
-	WriteTimeout    time.Duration
-	PingInterval    time.Duration
+	HTTPAddr          string
+	LogLevel          string
+	Env               string
+	UCANTTL           time.Duration
+	SubjectPrefix     string
+	OutboundBuffer    int
+	WriteTimeout      time.Duration
+	PingInterval      time.Duration
 	HandshakeDeadline time.Duration
 }
 
@@ -27,7 +25,6 @@ func Default() Config {
 		Env:               "dev",
 		UCANTTL:           1 * time.Hour,
 		SubjectPrefix:     "demo.",
-		MaxConnections:    50_000,
 		OutboundBuffer:    256,
 		WriteTimeout:      5 * time.Second,
 		PingInterval:      20 * time.Second,
@@ -55,13 +52,6 @@ func FromEnv() (Config, error) {
 			return c, fmt.Errorf("RELAY_UCAN_TTL: %w", err)
 		}
 		c.UCANTTL = d
-	}
-	if v := os.Getenv("RELAY_MAX_CONNECTIONS"); v != "" {
-		n, err := strconv.Atoi(v)
-		if err != nil {
-			return c, fmt.Errorf("RELAY_MAX_CONNECTIONS: %w", err)
-		}
-		c.MaxConnections = n
 	}
 	return c, nil
 }

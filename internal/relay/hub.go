@@ -25,12 +25,6 @@ func (h *Hub) Remove(c *Connection) {
 	h.mu.Unlock()
 }
 
-func (h *Hub) Count() int {
-	h.mu.RLock()
-	defer h.mu.RUnlock()
-	return len(h.conns)
-}
-
 // CloseAll triggers close() on every connection. Each connection handles its
 // own goroutine teardown. Safe to call multiple times.
 func (h *Hub) CloseAll() {
